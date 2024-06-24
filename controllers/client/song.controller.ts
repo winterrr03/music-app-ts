@@ -63,3 +63,30 @@ export const detail = async (req: Request, res: Response) => {
     topic: topic
   });
 };
+
+// [PATCH] /songs/like/:status/:songId
+export const like = async (req: Request, res: Response) => {
+  const status = req.params.status;
+
+  const song = await Song.findOne({
+    _id: req.params.songId,
+    deleted: false,
+    status: "active"
+  });
+
+  const updateLike = status == "like" ? song.like + 1 : song.like - 1;
+
+  await Song.updateOne({
+    _id: req.params.songId,
+    deleted: false,
+    status: "active"
+  }, {
+    like: updateLike
+  });
+
+  res.json({
+    code: 200,
+    message: "Thành công!",
+    like: updateLike
+  });
+};
