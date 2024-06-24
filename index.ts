@@ -12,9 +12,11 @@ const port: (number | string) = `${process.env.PORT}` || 3000;
 app.set("views", "./views");
 app.set("view engine", "pug");
 
-app.get("/topics", (req: Request, res: Response) => {
-  res.render("client/pages/topics/index")
-});
+app.use(express.static("public"));
+
+import clientRoutes from "./routes/client/index.route";
+
+clientRoutes(app);
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);
