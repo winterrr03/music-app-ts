@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Topic from "../../models/topic.model";
 import Song from "../../models/song.model";
 import Singer from "../../models/singer.model";
+import FavoriteSong from "../../models/favorite-song.model";
 
 // [GET] /songs/:slugTopic
 export const list = async (req: Request, res: Response) => {
@@ -56,6 +57,13 @@ export const detail = async (req: Request, res: Response) => {
     deleted: false
   }).select("title");
 
+  const favoriteSong = await FavoriteSong.findOne({
+    userId: "",
+    songId: song.id
+  });
+
+  song["favorite"] = favoriteSong ? true : false;
+
   res.render("client/pages/songs/detail", {
     pageTitle: song.title,
     song: song,
@@ -88,5 +96,55 @@ export const like = async (req: Request, res: Response) => {
     code: 200,
     message: "Thành công!",
     like: updateLike
+  });
+};
+
+// [PATCH] /songs/favorite/:status/:songId
+export const favoritePatch  = async (req: Request, res: Response) => {
+  const status = req.params.status;
+  const songId = req.params.songId;
+
+  if (status == "favorite") {
+    const favoriteSong = new FavoriteSong({
+      userId: "",
+      songId: songId
+    });
+    await favoriteSong.save();
+  } else {
+    await FavoriteSong.deleteOne({
+      userId: "",
+      songId: songId
+    });
+  }
+
+  res.json({
+    code: 200,
+    message: status == "favorite" ? "Đã thêm vào yêu thích" : "Đã xóa yêu thích"
+  });
+};
+
+// [GET] /songs/favorite
+export const favorite = async (req: Request, res: Response) => {
+  const favoriteSongs = await FavoriteSong.find({
+    userId: "",
+    deleted: false
+  });
+
+  for (const item of favoriteSongs) {
+    const song = await Song.findOne({
+      _id: item.songId
+    }).select("avatar title slug singerId");
+
+    const singer = await Singer.findOne({
+      _id: song.singerId
+    }).select("fullName");
+
+    item["song"] = song;
+    item["singer"] = singer;
+  }
+
+  res.render("client/pages/songs/favorite", {
+    pageTitle: "Yêu thích",
+    favoriteSongs: favoriteSongs
   });
 };
