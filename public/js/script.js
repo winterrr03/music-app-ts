@@ -4,6 +4,9 @@ if (aplayer) {
   let dataSong = aplayer.getAttribute("data-song");
   dataSong = JSON.parse(dataSong);
 
+  lyricsHtml = document.createElement("div");
+  lyricsHtml.innerHTML = `${dataSong.lyrics}`;
+
   let dataSinger = aplayer.getAttribute("data-singer");
   dataSinger = JSON.parse(dataSinger);
 
@@ -15,7 +18,7 @@ if (aplayer) {
       artist: dataSinger.fullName,
       url: dataSong.audio,
       cover: dataSong.avatar,
-      lrc: dataSong.lyrics
+      lrc: lyricsHtml.textContent
     }],
     autoplay: true
   });
